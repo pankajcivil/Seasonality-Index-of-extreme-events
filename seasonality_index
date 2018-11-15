@@ -1,0 +1,76 @@
+% This function can be use to calculate seasonal distribution of any exteme
+% events in hydrology namely, low flows or maximum flow. It relies on two
+% parameter, namely :
+% r: the length of the mean vector is a measure of the variability of low flow days
+% theta: the directional angle of the mean vector.
+%_______________________________________________%
+% Code is written by Pankaj Dey, PhD student at Department of Civil
+% Engineeing, Indian Institute of Science, Bangalore.
+%_______________________________________________%
+%
+%
+% Input: date: it is an array which compose of the dates when the extermes
+% are observed in a particular year. The structure of date is as follows:
+%
+ %For example:    		Col.1     Col.2      Col.3
+%                                Year     Month       Day
+%                        
+%                      date=     1904        3         1
+%                                    1905        3         1
+%
+%
+%  Output: results: a matrix whose 
+%                            First row element denotes the length of the
+%                            mean vector
+%                            Second row element denotes the directional
+%                            angle of the mean vector
+%                           Third row element denotes the mean day of
+%                           occurence of extreme.
+%
+% Additionally a polar plot will pop up ehich will graphically display the
+% position of the mean vector in polar cordiantes.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%  Note: a function name 'date2julian' is used in this function. 
+%
+%
+%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++%
+%
+%  References: Laaha, G. and Bl�schl, G., 2006. Seasonality indices for regionalizing low flows. Hydrological Processes, 20(18), pp.3851-3878.
+%
+%
+function [results]=seasonality_index(date)
+% For example, let date is an array with dates of observation of low flows
+% at any point in a stream for various years. That is, it is composed of
+% the annual minimum low flows.
+[m n]=size(date);
+for i=1:1:m
+    juliandate(i,1)=date2julian(date(i,:));
+    theta_radian(i,1)=(2*pi/365)* juliandate(i,1);
+    cosine_theta_radian(i,1)=cos(theta_radian(i,1));
+    sine_theta_radian(i,1)=sin(theta_radian(i,1));
+end
+x_theta=mean( cosine_theta_radian);
+y_theta=mean(sine_theta_radian);
+angle_degree=atand(y_theta/x_theta);                   % in degrees
+angle_radian=atan(y_theta/x_theta);                      % in radians
+if (x_theta<0)
+    angle_theta=angle_degree+180;
+else
+    angle_theta=angle_degree;
+end
+% The mean day of occurrence is obtained by back-transforming the mean angle to a Julian date
+mean_day_of_occurence=(angle_theta)*(365/360); 
+%  For example,the length r of the mean vector is a measure of the variability of low flow days:
+r=sqrt(x_theta^2 +y_theta^2);
+% Output of the function
+results=[r; angle_theta; mean_day_of_occurence]
+% Polar plotting
+rho1=0;
+theta1=0;
+rho2=r;
+theta2=deg2rad(angle_theta);
+rho=[rho1 rho2];
+theta=[theta1 theta2];
+polarplot(theta,rho,'color','k')
+end
